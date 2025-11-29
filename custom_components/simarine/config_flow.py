@@ -67,7 +67,7 @@ class SimarineConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     if not self._discovered_device or (now - self._last_discovery) > DISCOVERY_CACHE_TTL:
       self._discovered_device = await self.hass.async_add_executor_job(
         SimarineClient.discover,
-        udp_kwargs={"port": self._manual_overrides.get(CONF_UDP_PORT, DEFAULT_UDP_PORT)},
+        {"port": self._manual_overrides.get(CONF_UDP_PORT, DEFAULT_UDP_PORT)},
       )
       self._last_discovery = now
 
