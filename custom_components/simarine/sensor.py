@@ -85,7 +85,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
   coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
   entities = []
-  for sensor in coordinator.data["sensors"]:
+  for sensor in coordinator.data["sensors"].values():
     if type(sensor) is simarinetypes.NoneSensor:
       continue
     if coordinator.data["devices"].get(sensor.device_id) is None:
