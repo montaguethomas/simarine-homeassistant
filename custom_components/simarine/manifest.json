@@ -1,0 +1,15 @@
+{
+  "domain": "simarine",
+  "name": "Simarine",
+  "version": "0.1.0",
+  "documentation": "https://github.com/montaguethomas/simarine-homeassistant",
+  "requirements": [
+    "git+https://github.com/montaguethomas/simarine-python.git"
+  ],
+  "dependencies": [],
+  "codeowners": [
+    "@montaguethomas"
+  ],
+  "iot_class": "local_polling",
+  "config_flow": true
+}

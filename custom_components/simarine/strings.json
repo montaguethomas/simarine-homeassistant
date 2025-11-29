@@ -1,0 +1,26 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configure Simarine",
+        "description": "Configure connection to your Simarine device.\n\nYou may either provide connection details manually, or leave the host field empty to use automatic discovery.",
+        "data": {
+          "host": "Simarine Host (optional)",
+          "tcp_port": "TCP Port",
+          "udp_port": "UDP Port",
+          "update_interval": "Update Interval (seconds)"
+        }
+      },
+      "discover": {
+        "title": "Simarine Discovery",
+        "description": "A Simarine device was discovered using UDP broadcast.\n\nThe values you entered on the previous screen for TCP/UDP ports and update interval have been retained.\n\nClick retry to force a new scan.",
+        "data": {
+          "retry": "Retry discovery"
+        }
+      }
+    },
+    "error": {
+      "no_devices_found": "No Simarine devices were found on the network."
+    }
+  }
+}
