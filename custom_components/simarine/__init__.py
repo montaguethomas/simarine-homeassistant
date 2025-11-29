@@ -29,6 +29,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
   title = f"Simarine {coordinator.data['system_info']['serial_number']} ({entry.data.get(CONF_HOST)})"
 
-  await hass.config_entries.async_update_entry(entry, title=title)
+  hass.config_entries.async_update_entry(entry, title=title)
   await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
   return True
