@@ -72,10 +72,10 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
 
-      case simarinetypes.TimestampSensor:
-        self._attr_device_class = SensorDeviceClass.TIMESTAMP
-        self._attr_native_value = sensor.datetime
-        self._attr_state_class = None
+      # case simarinetypes.TimestampSensor:
+      #  self._attr_device_class = SensorDeviceClass.TIMESTAMP
+      #  self._attr_native_value = sensor.datetime
+      #  self._attr_state_class = None
 
       case simarinetypes.VoltageSensor:
         self._attr_device_class = SensorDeviceClass.VOLTAGE
