@@ -28,10 +28,10 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
 
     self._attr_device_info = DeviceInfo(
       default_name=f"Simarine {serial_number}",
-      identifiers={(DOMAIN, serial_number)},
+      identifiers={(DOMAIN, str(serial_number))},
       manufacturer="Simarine",
       model="Pico",
-      serial_number=serial_number,
+      serial_number=str(serial_number),
       sw_version=firmware_version,
     )
     self._attr_unique_id = f"{serial_number}-{sensor_id}"
