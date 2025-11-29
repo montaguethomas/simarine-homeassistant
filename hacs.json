@@ -7,6 +7,5 @@
   "domains": [
     "simarine"
   ],
-  "homeassistant": "2023.8.0",
-  "version": "main"
+  "homeassistant": "2023.8.0"
 }
