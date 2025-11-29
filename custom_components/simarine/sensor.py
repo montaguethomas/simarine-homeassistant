@@ -84,8 +84,12 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
 async def async_setup_entry(hass, config_entry, async_add_entities):
   coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-  sensor_ids = coordinator.data["sensors"].keys()
-
-  entities = [SimarineSensor(coordinator, sensor_id) for sensor_id in sensor_ids]
+  entities = []
+  for sensor in coordinator.data["sensors"]:
+    if type(sensor) is simarinetypes.NoneSensor:
+      continue
+    if coordinator.data["devices"].get(sensor.device_id) is None:
+      continue
+    entities.append(SimarineSensor(coordinator, sensor.id))
 
   async_add_entities(entities)
