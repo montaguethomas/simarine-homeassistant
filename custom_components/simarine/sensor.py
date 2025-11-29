@@ -30,7 +30,7 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
       identifiers={(DOMAIN, f"{serial_number}-{device.id}")},
       manufacturer="Simarine",
       model=device.type,
-      name=device.name,
+      name=str(device.name),
       # serial_number=str(serial_number),
       # sw_version=firmware_version,
       # via_device=(DOMAIN, str(serial_number)),
