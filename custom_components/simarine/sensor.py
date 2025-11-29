@@ -27,14 +27,16 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
     firmware_version = system_info.get("firmware_version")
 
     self._attr_device_info = DeviceInfo(
-      identifiers={(DOMAIN, str(serial_number))},
+      identifiers={(DOMAIN, f"{serial_number}-{device.id}")},
       manufacturer="Simarine",
-      model="Pico",
-      name=f"Simarine {serial_number}",
-      serial_number=str(serial_number),
-      sw_version=firmware_version,
+      model=device.type,
+      name=device.name,
+      # serial_number=str(serial_number),
+      # sw_version=firmware_version,
+      # via_device=(DOMAIN, str(serial_number)),
     )
-    self._attr_unique_id = f"{serial_number}-{sensor_id}"
+
+    self._attr_unique_id = f"{serial_number}-{device.id}-{sensor.id}"
     self._attr_name = f"{device.name or device.type} {sensor.type}"
 
     self._attr_native_value = sensor.state

@@ -97,3 +97,6 @@ class SimarineConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
       title=f"Simarine {serial_number} ({host})",
       data=config_data,
     )
+
+
+# <img slot="graphic" crossorigin="anonymous" referrerpolicy="no-referrer" alt="Simarine" src="https://brands.home-assistant.io/simarine/dark_icon.png">
