@@ -75,6 +75,7 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
       case simarinetypes.TimestampSensor:
         self._attr_device_class = SensorDeviceClass.TIMESTAMP
         self._attr_native_value = sensor.datetime
+        self._attr_state_class = None
 
       case simarinetypes.VoltageSensor:
         self._attr_device_class = SensorDeviceClass.VOLTAGE
