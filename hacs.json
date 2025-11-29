@@ -1,11 +1,12 @@
 {
   "name": "Simarine",
   "content_in_root": false,
-  "domains": [
-    "simarine"
-  ],
   "country": [
     "US"
   ],
-  "homeassistant": "2023.8.0"
+  "domains": [
+    "simarine"
+  ],
+  "homeassistant": "2023.8.0",
+  "version": "main"
 }
