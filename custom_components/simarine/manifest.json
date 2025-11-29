@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "documentation": "https://github.com/montaguethomas/simarine-homeassistant",
   "requirements": [
-    "git+https://github.com/montaguethomas/simarine-python.git"
+    "simarine@git+https://github.com/montaguethomas/simarine-python.git@main"
   ],
   "dependencies": [],
   "codeowners": [
