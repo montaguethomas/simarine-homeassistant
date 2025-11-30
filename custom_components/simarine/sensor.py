@@ -19,6 +19,7 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
   def __init__(self, coordinator, sensor_id: str):
     super().__init__(coordinator)
 
+    self.sensor_id = sensor_id
     sensor = self.coordinator.data["sensors"].get(sensor_id)
     device = self.coordinator.data["devices"].get(sensor.device_id)
 
@@ -39,7 +40,6 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
     self._attr_unique_id = f"{serial_number}-{device.id}-{sensor.id}"
     self._attr_name = f"{device.name or device.type} {sensor.type}"
 
-    self._attr_native_value = sensor.state
     self._attr_state_class = SensorStateClass.MEASUREMENT
     self._attr_suggested_display_precision = 2
 
@@ -82,6 +82,10 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
       case simarinetypes.VoltageSensor:
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
+
+  def native_value(self):
+    sensor = self.coordinator.data["sensors"].get(self.sensor_id)
+    return sensor.state
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
