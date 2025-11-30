@@ -75,7 +75,7 @@ class SimarineCoordinator(DataUpdateCoordinator):
         self._system_info = dict(zip(["serial_number", "firmware_version"], self._client.get_system_info()))
 
       if self._system_device is None:
-        self._system_device = self.client.get_system_device()
+        self._system_device = self._client.get_system_device()
 
       if self._devices is None:
         self._devices = self._client.get_devices()
