@@ -38,7 +38,7 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
     )
 
     self._attr_unique_id = f"{serial_number}-{device.id}-{sensor.id}"
-    self._attr_name = f"{device.name or device.type} {sensor.type}"
+    self._attr_name = f"{device.name or device.title} {sensor.title}"
 
     self._attr_state_class = SensorStateClass.MEASUREMENT
     self._attr_suggested_display_precision = 2
