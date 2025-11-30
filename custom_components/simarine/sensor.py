@@ -85,7 +85,7 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
 
   def native_value(self):
     sensor = self.coordinator.data["sensors"].get(self.sensor_id)
-    return sensor.state
+    return sensor.state()
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
