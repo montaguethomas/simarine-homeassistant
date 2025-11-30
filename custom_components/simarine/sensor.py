@@ -83,9 +83,10 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
 
+  @property
   def native_value(self):
     sensor = self.coordinator.data["sensors"].get(self.sensor_id)
-    return sensor.state()
+    return sensor.state
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
