@@ -23,6 +23,7 @@ class SimarineCoordinator(DataUpdateCoordinator):
     self._connected = False
 
     self._system_info = None
+    self._system_device = None
     self._devices = None
     self._sensors = None
 
@@ -73,8 +74,12 @@ class SimarineCoordinator(DataUpdateCoordinator):
       if self._system_info is None:
         self._system_info = dict(zip(["serial_number", "firmware_version"], self._client.get_system_info()))
 
+      if self._system_device is None:
+        self._system_device = self.client.get_system_device()
+
       if self._devices is None:
         self._devices = self._client.get_devices()
+
       if self._sensors is None:
         self._sensors = self._client.get_sensors()
         self._client.update_sensors_state(self._sensors)
@@ -89,9 +94,10 @@ class SimarineCoordinator(DataUpdateCoordinator):
               self._devices[id] = self._client.get_device(id)
 
       return {
+        "system_info": self._system_info,
+        "system_device": self._system_device,
         "devices": self._devices,
         "sensors": self._sensors,
-        "system_info": self._system_info,
       }
 
     except Exception as e:

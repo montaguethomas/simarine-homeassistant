@@ -20,10 +20,9 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
     super().__init__(coordinator)
 
     self.sensor_id = sensor_id
-    sensor = self.coordinator.data["sensors"].get(sensor_id)
-    device = self.coordinator.data["devices"].get(sensor.device_id)
+    device, sensor = self._objects()
 
-    system_info = self.coordinator.data.get("system_info", {})
+    system_info = self._system_info()
     serial_number = system_info.get("serial_number")
     firmware_version = system_info.get("firmware_version")
 
@@ -38,7 +37,6 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
     )
 
     self._attr_unique_id = f"{serial_number}-{device.id}-{sensor.id}"
-    self._attr_name = f"{device.name or device.title} {sensor.title}"
 
     self._attr_state_class = SensorStateClass.MEASUREMENT
     self._attr_suggested_display_precision = 2
@@ -83,9 +81,22 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
 
+  def _objects(self):
+    sensor = self.coordinator.data["sensors"].get(self.sensor_id)
+    device = self.coordinator.data["devices"].get(sensor.device_id)
+    return device, sensor
+
+  def _system_info(self):
+    return self.coordinator.data.get("system_info", {})
+
+  @property
+  def name(self):
+    device, sensor = self._objects()
+    return f"{device.name or device.title} {sensor.title}"
+
   @property
   def native_value(self):
-    sensor = self.coordinator.data["sensors"].get(self.sensor_id)
+    _, sensor = self._objects()
     return sensor.state
 
 
