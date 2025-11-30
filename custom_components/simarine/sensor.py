@@ -53,7 +53,7 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = UnitOfPressure.MBAR
 
       case simarinetypes.AtmosphereTrendSensor:
-        self._attr_native_unit_of_measurement = "mb/h"
+        self._attr_native_unit_of_measurement = "mbar/h"
 
       case simarinetypes.CoulombCounterSensor:
         self._attr_native_unit_of_measurement = "Ah"
