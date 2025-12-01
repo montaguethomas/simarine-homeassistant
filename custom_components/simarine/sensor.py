@@ -6,6 +6,7 @@ from homeassistant.const import (
   UnitOfElectricPotential,
   UnitOfPressure,
   UnitOfTemperature,
+  UnitOfTime,
 )
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -38,8 +39,8 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
 
     self._attr_unique_id = f"{serial_number}-{device.id}-{sensor.id}"
 
-    self._attr_state_class = SensorStateClass.MEASUREMENT
-    self._attr_suggested_display_precision = 2
+    self._attr_state_class = SensorStateClass.MEASUREMENT if isinstance(sensor.state, (int, float)) else None
+    self._attr_suggested_display_precision = 2 if isinstance(sensor.state, (int, float)) else None
 
     match type(sensor):
       case simarinetypes.AngleSensor:
@@ -71,6 +72,9 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
       case simarinetypes.TemperatureSensor:
         self._attr_device_class = SensorDeviceClass.TEMPERATURE
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+
+      case simarinetypes.RemainingTimeSensor:
+        self._attr_native_unit_of_measurement = UnitOfTime.SECONDS
 
       # case simarinetypes.TimestampSensor:
       #  self._attr_device_class = SensorDeviceClass.TIMESTAMP
