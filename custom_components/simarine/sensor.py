@@ -39,7 +39,7 @@ async def async_setup_entry(
 
   entities = []
   for sensor in coordinator.data.sensors.values():
-    if isinstance(sensor, (simarinetypes.Sensor, simarinetypes.NoneSensor)):
+    if sensor.type in ["none", "unknown"]:
       continue
     if coordinator.data.devices.get(sensor.device_id) is None:
       continue
