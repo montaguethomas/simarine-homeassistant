@@ -31,7 +31,7 @@ _LOGGER = logging.getLogger(__name__)
 # ----------------------------------------------------------------------------
 STEP_USER_DATA_SCHEMA = vol.Schema(
   {
-    vol.Required(CONF_HOST): str,
+    vol.Optional(CONF_HOST): str,
     vol.Optional(CONF_TCP_PORT, default=DEFAULT_TCP_PORT): cv.port,
     vol.Optional(CONF_UDP_PORT, default=DEFAULT_UDP_PORT): cv.port,
     vol.Optional(
@@ -53,15 +53,23 @@ class SimarineConfigFlow(ConfigFlow, domain=DOMAIN):
     Called when you initiate adding an integration via the UI
     """
 
-    if user_input is not None:
-      tcp_kwargs = {
-        "host": user_input.get(CONF_HOST),
-        "port": user_input.get(CONF_TCP_PORT),
-      }
-      udp_kwargs = {
-        "port": user_input.get(CONF_UDP_PORT),
-      }
+    if user_input is None:
+      return self.async_show_form(step_id="user", data_schema=STEP_USER_DATA_SCHEMA)
 
+    tcp_kwargs = {
+      "host": user_input.get(CONF_HOST),
+      "port": user_input.get(CONF_TCP_PORT),
+    }
+    udp_kwargs = {
+      "port": user_input.get(CONF_UDP_PORT),
+    }
+
+    if not user_input.get(CONF_HOST):
+      ip, serial_number, firmware_version = SimarineClient.discover(udp_kwargs)
+      if not ip or not serial_number:
+        return self.async_abort(reason="no_devices_found")
+      user_input[CONF_HOST] = ip
+    else:
       try:
         with SimarineClient(tcp_kwargs=tcp_kwargs, udp_kwargs=udp_kwargs, auto_discover=False) as client:
           serial_number, firmware_version = client.get_system_info()
@@ -71,12 +79,10 @@ class SimarineConfigFlow(ConfigFlow, domain=DOMAIN):
         _LOGGER.exception("Unexpected exception")
         return self.async_abort(reason="unknown")
 
-      await self.async_set_unique_id(str(serial_number))
-      self._abort_if_unique_id_configured()
+    await self.async_set_unique_id(str(serial_number))
+    self._abort_if_unique_id_configured()
 
-      return self.async_create_entry(
-        title=f"{DOMAIN.capitalize()} {serial_number} ({user_input.get(CONF_HOST)})",
-        data=user_input,
-      )
-
-    return self.async_show_form(step_id="user", data_schema=STEP_USER_DATA_SCHEMA)
+    return self.async_create_entry(
+      title=f"{DOMAIN.capitalize()} {serial_number} ({user_input.get(CONF_HOST)})",
+      data=user_input,
+    )

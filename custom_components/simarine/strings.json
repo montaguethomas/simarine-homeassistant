@@ -3,6 +3,7 @@
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_service%]",
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "no_devices_found": "No Simarine devices were found on the network.",
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "step": {
@@ -14,7 +15,7 @@
           "scan_interval": "Scan Interval (seconds)"
         },
         "data_description": {
-          "host": "The hostname or IP address of a Simarine Pico.",
+          "host": "The hostname or IP address of a Simarine Pico. Leave blank to try discovery.",
           "scan_interval": "How frequently to poll for states."
         }
       }
