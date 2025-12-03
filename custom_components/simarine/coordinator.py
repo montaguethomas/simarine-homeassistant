@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 import logging
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -11,11 +12,12 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from simarine.client import SimarineClient
 import simarine.types as simarinetypes
 
-from . import SimarineConfigEntry
 from .const import CONF_TCP_PORT, CONF_UDP_PORT, DOMAIN
 
 
 _LOGGER = logging.getLogger(__name__)
+
+type SimarineConfigEntry = ConfigEntry[SimarineCoordinator]
 
 
 @dataclass

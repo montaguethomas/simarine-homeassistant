@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.device_registry import DeviceEntry
 
-from .coordinator import SimarineCoordinator
+from .coordinator import SimarineConfigEntry, SimarineCoordinator
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -18,8 +18,6 @@ _LOGGER = logging.getLogger(__name__)
 _PLATFORMS: list[Platform] = [
   Platform.SENSOR,
 ]
-
-type SimarineConfigEntry = ConfigEntry[SimarineCoordinator]
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: SimarineConfigEntry) -> bool:
