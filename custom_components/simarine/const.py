@@ -1,16 +1,11 @@
-from simarine.transport import DEFAULT_TCP_PORT, DEFAULT_UDP_PORT
+"""Constants for the Simarine integration."""
 
-DOMAIN = "simarine"
+from typing import Final
 
-PLATFORMS = ["sensor"]
+DOMAIN: Final = "simarine"
 
-CONF_HOST = "host"
-CONF_TCP_PORT = "tcp_port"
-CONF_UDP_PORT = "udp_port"
-CONF_UPDATE_INTERVAL = "update_interval"
+CONF_TCP_PORT: Final = "tcp_port"
+CONF_UDP_PORT: Final = "udp_port"
 
-DEFAULT_TCP_PORT = DEFAULT_TCP_PORT
-DEFAULT_UDP_PORT = DEFAULT_UDP_PORT
-DEFAULT_UPDATE_INTERVAL = 10  # seconds
-
-DISCOVERY_CACHE_TTL = 60  # seconds
+DEFAULT_SCAN_INTERVAL: Final = 15
+MIN_SCAN_INTERVAL: Final = 5

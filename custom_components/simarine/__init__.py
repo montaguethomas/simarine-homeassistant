@@ -1,34 +1,48 @@
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+"""The Simarine integration."""
 
-from .const import (
-  DOMAIN,
-  PLATFORMS,
-  CONF_UPDATE_INTERVAL,
-  CONF_HOST,
-  CONF_TCP_PORT,
-  CONF_UDP_PORT,
-  DEFAULT_UPDATE_INTERVAL,
-)
+from __future__ import annotations
+
+import logging
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers.device_registry import DeviceEntry
+
 from .coordinator import SimarineCoordinator
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
-  coordinator = SimarineCoordinator(
-    hass=hass,
-    host=entry.data.get(CONF_HOST),
-    tcp_port=entry.data.get(CONF_TCP_PORT),
-    udp_port=entry.data.get(CONF_UDP_PORT),
-    update_interval=entry.data.get(CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL),
-  )
+_LOGGER = logging.getLogger(__name__)
 
+_PLATFORMS: list[Platform] = [
+  Platform.SENSOR,
+]
+
+type SimarineConfigEntry = ConfigEntry[SimarineCoordinator]
+
+
+async def async_setup_entry(hass: HomeAssistant, config_entry: SimarineConfigEntry) -> bool:
+  """Set up Simarine Integration from a config entry."""
+
+  coordinator = SimarineCoordinator(hass, config_entry)
   await coordinator.async_config_entry_first_refresh()
 
-  hass.data.setdefault(DOMAIN, {})
-  hass.data[DOMAIN][entry.entry_id] = coordinator
+  if not coordinator.data:
+    raise ConfigEntryNotReady
 
-  title = f"Simarine {coordinator.data['system_info']['serial_number']} ({entry.data.get(CONF_HOST)})"
+  config_entry.async_on_unload(coordinator.close)
 
-  hass.config_entries.async_update_entry(entry, title=title)
-  await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+  config_entry.runtime_data = coordinator
+  await hass.config_entries.async_forward_entry_setups(config_entry, _PLATFORMS)
   return True
+
+
+async def async_remove_config_entry_device(hass: HomeAssistant, config_entry: ConfigEntry, device_entry: DeviceEntry) -> bool:
+  """Delete device if selected from UI."""
+  return True
+
+
+async def async_unload_entry(hass: HomeAssistant, config_entry: SimarineConfigEntry) -> bool:
+  """Unload a config entry."""
+  return await hass.config_entries.async_unload_platforms(config_entry, _PLATFORMS)

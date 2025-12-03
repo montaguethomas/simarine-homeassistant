@@ -1,4 +1,12 @@
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+"""Sensor setup for the Simarine integration."""
+
+import logging
+
+from homeassistant.components.sensor import (
+  SensorDeviceClass,
+  SensorEntity,
+  SensorStateClass,
+)
 from homeassistant.const import (
   DEGREE,
   PERCENTAGE,
@@ -8,41 +16,48 @@ from homeassistant.const import (
   UnitOfTemperature,
   UnitOfTime,
 )
-from homeassistant.helpers.entity import DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 import simarine.types as simarinetypes
 
-from .const import DOMAIN
+from . import SimarineConfigEntry
+from .entity import SimarineEntity
+from .coordinator import SimarineCoordinator
 
 
-class SimarineSensor(CoordinatorEntity, SensorEntity):
+_LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_entry(
+  hass: HomeAssistant,
+  config_entry: SimarineConfigEntry,
+  async_add_entities: AddEntitiesCallback,
+):
+  """Set up the Sensors."""
+  coordinator: SimarineCoordinator = config_entry.runtime_data.coordinator
+
+  entities = []
+  for sensor in coordinator.data.sensors.values():
+    if type(sensor) is simarinetypes.NoneSensor:
+      continue
+    if coordinator.data.devices.get(sensor.device_id) is None:
+      continue
+    entities.append(SimarineSensorEntity(coordinator, sensor.id))
+
+  async_add_entities(entities)
+
+
+class SimarineSensorEntity(SimarineEntity, SensorEntity):
+  """Implementation of a sensor."""
+
   def __init__(self, coordinator, sensor_id: str):
-    super().__init__(coordinator)
+    super().__init__(coordinator, sensor_id)
 
-    self.sensor_id = sensor_id
-    device, sensor = self._objects()
+    self._attr_state_class = SensorStateClass.MEASUREMENT if isinstance(self.sensor.state, (int, float)) else None
+    self._attr_suggested_display_precision = 2 if isinstance(self.sensor.state, (int, float)) else None
 
-    system_info = self._system_info()
-    serial_number = system_info.get("serial_number")
-    firmware_version = system_info.get("firmware_version")
-
-    self._attr_device_info = DeviceInfo(
-      identifiers={(DOMAIN, f"{serial_number}-{device.id}")},
-      manufacturer="Simarine",
-      model=device.type,
-      name=str(device.name),
-      # serial_number=str(serial_number),
-      # sw_version=firmware_version,
-      # via_device=(DOMAIN, str(serial_number)),
-    )
-
-    self._attr_unique_id = f"{serial_number}-{device.id}-{sensor.id}"
-
-    self._attr_state_class = SensorStateClass.MEASUREMENT if isinstance(sensor.state, (int, float)) else None
-    self._attr_suggested_display_precision = 2 if isinstance(sensor.state, (int, float)) else None
-
-    match type(sensor):
+    match type(self.sensor):
       case simarinetypes.AngleSensor:
         self._attr_native_unit_of_measurement = DEGREE
         self._attr_state_class = SensorStateClass.MEASUREMENT_ANGLE
@@ -85,34 +100,6 @@ class SimarineSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
 
-  def _objects(self):
-    sensor = self.coordinator.data["sensors"].get(self.sensor_id)
-    device = self.coordinator.data["devices"].get(sensor.device_id)
-    return device, sensor
-
-  def _system_info(self):
-    return self.coordinator.data.get("system_info", {})
-
   @property
-  def name(self):
-    device, sensor = self._objects()
-    return f"{device.name or device.title} {sensor.title}"
-
-  @property
-  def native_value(self):
-    _, sensor = self._objects()
-    return sensor.state
-
-
-async def async_setup_entry(hass, config_entry, async_add_entities):
-  coordinator = hass.data[DOMAIN][config_entry.entry_id]
-
-  entities = []
-  for sensor in coordinator.data["sensors"].values():
-    if type(sensor) is simarinetypes.NoneSensor:
-      continue
-    if coordinator.data["devices"].get(sensor.device_id) is None:
-      continue
-    entities.append(SimarineSensor(coordinator, sensor.id))
-
-  async_add_entities(entities)
+  def native_value(self) -> int | float | str:
+    return self.sensor.state

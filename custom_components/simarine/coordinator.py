@@ -1,49 +1,60 @@
+"""DataUpdateCoordinator for the Simarine integration."""
+
+from dataclasses import dataclass
 from datetime import timedelta
 import logging
 
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.const import CONF_HOST, CONF_SCAN_INTERVAL
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from simarine.client import SimarineClient
+import simarine.types as simarinetypes
+
+from . import SimarineConfigEntry
+from .const import CONF_TCP_PORT, CONF_UDP_PORT, DOMAIN
 
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class SimarineCoordinator(DataUpdateCoordinator):
-  def __init__(self, hass: HomeAssistant, host, tcp_port, udp_port, update_interval: int):
-    self._hass = hass
+@dataclass
+class SimarineData:
+  """Class to hold your data."""
 
-    self.host = host
-    self.tcp_port = tcp_port
-    self.udp_port = udp_port
-    self.update_interval_seconds = update_interval
+  firmware_version: str
+  serial_number: str
+  system_device: simarinetypes.Device
+  devices: dict[int, simarinetypes.Device]
+  sensors: dict[int, simarinetypes.Sensor]
 
-    self._client = None
-    self._connected = False
 
-    self._system_info = None
-    self._system_device = None
-    self._devices = None
-    self._sensors = None
+class SimarineCoordinator(DataUpdateCoordinator[SimarineData]):
+  """Simarine coordinator."""
+
+  def __init__(self, hass: HomeAssistant, config_entry: SimarineConfigEntry) -> None:
+    """Initialize coordinator."""
 
     super().__init__(
       hass,
       _LOGGER,
-      name="Simarine",
-      update_interval=timedelta(seconds=update_interval),
+      config_entry=config_entry,
+      name=f"{DOMAIN} ({config_entry.unique_id})",
+      update_interval=timedelta(seconds=config_entry.data.get(CONF_SCAN_INTERVAL)),
     )
+
+    self._client = None
+    self._connected = False
 
   def _connect(self):
     try:
-      if self.host:
-        _LOGGER.info("Connecting to Simarine @ %s (TCP:%s UDP:%s)", self.host, self.tcp_port, self.udp_port)
-      else:
-        _LOGGER.info("Auto-discovering Simarine device...")
-
+      _LOGGER.info(
+        f"Connecting to Simarine @ {self.config_entry.data[CONF_HOST]} (TCP:{self.config_entry.data[CONF_TCP_PORT]} UDP:{self.config_entry.data[CONF_UDP_PORT]})"
+      )
       self._client = SimarineClient(
-        tcp_kwargs={"host": self.host, "port": self.tcp_port},
-        udp_kwargs={"port": self.udp_port},
+        tcp_kwargs={"host": self.config_entry.data[CONF_HOST], "port": self.config_entry.data[CONF_TCP_PORT]},
+        udp_kwargs={"port": self.config_entry.data[CONF_UDP_PORT]},
+        auto_discover=False,
       )
       self._client.open()
       self._connected = True
@@ -63,6 +74,20 @@ class SimarineCoordinator(DataUpdateCoordinator):
     self._client = None
     self._connected = False
 
+  def close(self):
+    self._disconnect()
+
+  async def _async_setup(self):
+    self._connect()
+    serial_number, firmware_version = self._client.get_system_info()
+    self.data = SimarineData(
+      firmware_version=firmware_version,
+      serial_number=str(serial_number),
+      system_device=self._client.get_system_device(),
+      devices=self._client.get_devices(),
+      sensors=self._client.get_sensors(),
+    )
+
   async def _async_update_data(self):
     try:
       if not self._connected or not self._client:
@@ -71,34 +96,16 @@ class SimarineCoordinator(DataUpdateCoordinator):
       if not self._connected:
         raise UpdateFailed("Unable to connect to Simarine device")
 
-      if self._system_info is None:
-        self._system_info = dict(zip(["serial_number", "firmware_version"], self._client.get_system_info()))
-
-      if self._system_device is None:
-        self._system_device = self._client.get_system_device()
-
-      if self._devices is None:
-        self._devices = self._client.get_devices()
-
-      if self._sensors is None:
-        self._sensors = self._client.get_sensors()
-        self._client.update_sensors_state(self._sensors)
-      else:
-        sensors_state = self._client.get_sensors_state()
-        for id, state_field in sensors_state.items():
-          if id in self._sensors:
-            self._sensors[id].state_field = state_field
-          else:
-            self._sensors[id] = self._client.get_sensor(id)
-            if self._sensors[id].device_id not in self._devices:
-              self._devices[id] = self._client.get_device(id)
-
-      return {
-        "system_info": self._system_info,
-        "system_device": self._system_device,
-        "devices": self._devices,
-        "sensors": self._sensors,
-      }
+      data = self.data
+      sensors_state = self._client.get_sensors_state()
+      for id, state_field in sensors_state.items():
+        if id in data.sensors:
+          data.sensors[id].state_field = state_field
+        else:
+          data.sensors[id] = self._client.get_sensor(id)
+          if data.sensors[id].device_id not in data.devices:
+            data.devices[id] = self._client.get_device(id)
+      return data
 
     except Exception as e:
       _LOGGER.warning("Simarine update failed: %s", e)
