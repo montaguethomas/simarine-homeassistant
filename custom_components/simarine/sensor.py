@@ -35,7 +35,7 @@ async def async_setup_entry(
   async_add_entities: AddEntitiesCallback,
 ):
   """Set up the Sensors."""
-  coordinator: SimarineCoordinator = config_entry.runtime_data.coordinator
+  coordinator: SimarineCoordinator = config_entry.runtime_data
 
   entities = []
   for sensor in coordinator.data.sensors.values():
