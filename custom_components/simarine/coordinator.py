@@ -50,14 +50,8 @@ class SimarineCoordinator(DataUpdateCoordinator[SimarineData]):
 
   def _connect(self):
     try:
-      _LOGGER.info(
-        f"Connecting to Simarine @ {self.config_entry.data[CONF_HOST]} (TCP:{self.config_entry.data[CONF_TCP_PORT]} UDP:{self.config_entry.data[CONF_UDP_PORT]})"
-      )
-      self._client = SimarineClient(
-        tcp_kwargs={"host": self.config_entry.data[CONF_HOST], "port": self.config_entry.data[CONF_TCP_PORT]},
-        udp_kwargs={"port": self.config_entry.data[CONF_UDP_PORT]},
-        auto_discover=False,
-      )
+      _LOGGER.info(f"Connecting to Simarine @ {self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_TCP_PORT]}")
+      self._client = SimarineClient(host=self.config_entry.data[CONF_HOST], port=self.config_entry.data[CONF_TCP_PORT], auto_discover=False)
       self._client.open()
       self._connected = True
       _LOGGER.info("Connected to Simarine")

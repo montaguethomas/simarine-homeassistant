@@ -56,22 +56,14 @@ class SimarineConfigFlow(ConfigFlow, domain=DOMAIN):
     if user_input is None:
       return self.async_show_form(step_id="user", data_schema=STEP_USER_DATA_SCHEMA)
 
-    tcp_kwargs = {
-      "host": user_input.get(CONF_HOST),
-      "port": user_input.get(CONF_TCP_PORT),
-    }
-    udp_kwargs = {
-      "port": user_input.get(CONF_UDP_PORT),
-    }
-
     if not user_input.get(CONF_HOST):
-      ip, serial_number, firmware_version = SimarineClient.discover(udp_kwargs)
+      ip, serial_number, firmware_version = SimarineClient.discover(port=user_input.get(CONF_UDP_PORT))
       if not ip or not serial_number:
         return self.async_abort(reason="no_devices_found")
       user_input[CONF_HOST] = ip
     else:
       try:
-        with SimarineClient(tcp_kwargs=tcp_kwargs, udp_kwargs=udp_kwargs, auto_discover=False) as client:
+        with SimarineClient(host=user_input.get(CONF_HOST), port=user_input.get(CONF_TCP_PORT), auto_discover=False) as client:
           serial_number, firmware_version = client.get_system_info()
       except TransportError:
         return self.async_abort(reason="cannot_connect")
