@@ -71,7 +71,6 @@ class SimarineSensorEntity(SimarineEntity, SensorEntity):
 
       case simarinetypes.CoulombCounterSensor:
         self._attr_native_unit_of_measurement = "Ah"
-        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
 
       case simarinetypes.CurrentSensor:
         self._attr_device_class = SensorDeviceClass.CURRENT
