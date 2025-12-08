@@ -24,6 +24,9 @@ class SimarineEntity(CoordinatorEntity[SimarineCoordinator]):
     super().__init__(coordinator)
     self.sensor_id = sensor_id
 
+    # Disable unknown sensors by default
+    self._attr_entity_registry_enabled_default = self.sensor.type != "unknown"
+
   @property
   def sensor(self) -> simarinetypes.Sensor:
     return self.coordinator.data.sensors.get(self.sensor_id)
