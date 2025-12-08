@@ -65,6 +65,7 @@ class SimarineSensorEntity(SimarineEntity, SensorEntity):
       case simarinetypes.AtmosphereSensor:
         self._attr_device_class = SensorDeviceClass.ATMOSPHERIC_PRESSURE
         self._attr_native_unit_of_measurement = UnitOfPressure.MBAR
+        self._attr_unit_of_measurement = UnitOfPressure.MBAR
 
       case simarinetypes.AtmosphereTrendSensor:
         self._attr_native_unit_of_measurement = "mbar/h"
