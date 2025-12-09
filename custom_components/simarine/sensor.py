@@ -101,6 +101,6 @@ class SimarineSensorEntity(SimarineEntity, SensorEntity):
 
   @property
   def native_value(self) -> datetime | int | float | str:
-    if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
+    if self.device_class == SensorDeviceClass.TIMESTAMP:
       return self.sensor.state.astimezone(self.device.timezone)
     return self.sensor.state
