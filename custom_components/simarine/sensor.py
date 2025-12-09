@@ -1,5 +1,6 @@
 """Sensor setup for the Simarine integration."""
 
+from datetime import datetime
 import logging
 
 from homeassistant.components.sensor import (
@@ -77,8 +78,8 @@ class SimarineSensorEntity(SimarineEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.CURRENT
         self._attr_native_unit_of_measurement = UnitOfElectricCurrent.AMPERE
 
-      # case simarinetypes.ResistanceSensor:
-      #  self._attr_device_class = SensorDeviceClass.
+      case simarinetypes.ResistanceSensor:
+        self._attr_native_unit_of_measurement = "Ω"
 
       case simarinetypes.StateOfChargeSensor:
         self._attr_device_class = SensorDeviceClass.BATTERY
@@ -91,15 +92,13 @@ class SimarineSensorEntity(SimarineEntity, SensorEntity):
       case simarinetypes.RemainingTimeSensor:
         self._attr_native_unit_of_measurement = UnitOfTime.SECONDS
 
-      # case simarinetypes.TimestampSensor:
-      #  self._attr_device_class = SensorDeviceClass.TIMESTAMP
-      #  self._attr_native_value = sensor.datetime
-      #  self._attr_state_class = None
+      case simarinetypes.TimestampSensor:
+        self._attr_device_class = SensorDeviceClass.TIMESTAMP
 
       case simarinetypes.VoltageSensor:
         self._attr_device_class = SensorDeviceClass.VOLTAGE
         self._attr_native_unit_of_measurement = UnitOfElectricPotential.VOLT
 
   @property
-  def native_value(self) -> int | float | str:
+  def native_value(self) -> datetime | int | float | str:
     return self.sensor.state
