@@ -10,6 +10,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import (
   DEGREE,
+  EntityCategory,
   PERCENTAGE,
   UnitOfElectricCurrent,
   UnitOfElectricPotential,
@@ -94,6 +95,7 @@ class SimarineSensorEntity(SimarineEntity, SensorEntity):
 
       case simarinetypes.TimestampSensor:
         self._attr_device_class = SensorDeviceClass.TIMESTAMP
+        self._attr_entity_registry_enabled_default = self.sensor.state_type == simarinetypes.TimestampStateType.BOOT
 
       case simarinetypes.VoltageSensor:
         self._attr_device_class = SensorDeviceClass.VOLTAGE
