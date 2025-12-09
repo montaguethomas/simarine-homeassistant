@@ -11,7 +11,7 @@
   "homekit": {},
   "iot_class": "local_polling",
   "requirements": [
-    "simarine@git+https://github.com/montaguethomas/simarine-python.git@1286e32"
+    "simarine@git+https://github.com/montaguethomas/simarine-python.git@57c1964"
   ],
   "single_config_entry": false,
   "ssdp": [],
