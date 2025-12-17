@@ -74,24 +74,34 @@ class SimarineCoordinator(DataUpdateCoordinator[SimarineData]):
     self._disconnect()
 
   async def _async_setup(self):
-    self._connect()
-    serial_number, firmware_version = self._client.get_system_info()
-    self.data = SimarineData(
-      firmware_version=firmware_version,
-      serial_number=str(serial_number),
-      system_device=self._client.get_system_device(),
-      devices=self._client.get_devices(),
-      sensors=self._client.get_sensors(),
-    )
+    if not self._connected or not self._client:
+      self._connect()
+
+    if not self._connected:
+      raise UpdateFailed("Unable to connect to Simarine device")
+
+    try:
+      serial_number, firmware_version = self._client.get_system_info()
+      self.data = SimarineData(
+        firmware_version=firmware_version,
+        serial_number=str(serial_number),
+        system_device=self._client.get_system_device(),
+        devices=self._client.get_devices(),
+        sensors=self._client.get_sensors(),
+      )
+    except Exception as e:
+      _LOGGER.warning("Simarine setup failed: %s", e)
+      self._disconnect()
+      raise UpdateFailed(f"Simarine connection lost: {e}")
 
   async def _async_update_data(self):
+    if not self._connected or not self._client:
+      self._connect()
+
+    if not self._connected:
+      raise UpdateFailed("Unable to connect to Simarine device")
+
     try:
-      if not self._connected or not self._client:
-        self._connect()
-
-      if not self._connected:
-        raise UpdateFailed("Unable to connect to Simarine device")
-
       data = self.data
       sensors_state = self._client.get_sensors_state()
       for id, state_field in sensors_state.items():
